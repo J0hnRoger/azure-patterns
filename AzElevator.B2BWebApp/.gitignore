@@ -391,6 +391,9 @@ FodyWeavers.xsd
 # Local History for Visual Studio Code
 .history/
 
+# Rider files
+.idea
+
 # Windows Installer files from build outputs
 *.cab
 *.msi
