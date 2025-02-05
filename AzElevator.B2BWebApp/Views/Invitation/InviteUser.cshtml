@@ -1,0 +1,64 @@
+﻿@{
+    ViewData["Title"] = "Inviter un collaborateur";
+}
+
+@using System.Linq;
+
+<h2>Inviter un collaborateur</h2>
+
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-success">
+        @ViewBag.Message
+    </div>
+}
+
+<form method="post">
+    <div class="mb-3">
+        <label for="email" class="form-label">Email du collaborateur :</label>
+        <input type="email" name="email" class="form-control" required placeholder="exemple@entreprise.com" />
+    </div>
+    <button type="submit" class="btn btn-primary">Envoyer l’invitation</button>
+</form>
+
+<hr />
+
+<h3>Utilisateurs invités</h3>
+
+@if (Model != null && Model!.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>@user.InvitedUserEmailAddress</td>
+                    <td>
+                        @if (user.Status == "Accepted")
+                        {
+                            <span class="badge bg-success">Accepté</span>
+                        }
+                        else if (user.Status == "Pending")
+                        {
+                            <span class="badge bg-warning">En attente</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Autre</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Aucun utilisateur invité pour le moment.</p>
+}

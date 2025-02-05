@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Identity" Version="1.13.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Graph" Version="5.69.0" />
     <PackageReference Include="Microsoft.Identity.Web" Version="3.6.2" />
   </ItemGroup>
 
