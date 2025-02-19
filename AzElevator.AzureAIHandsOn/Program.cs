@@ -1,4 +1,5 @@
 using AzElevator.AzureAIHandsOn.Services;
+using CSharpFunctionalExtensions;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,9 +20,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapPost("/ask", ([FromBody] QuestionDto question, [FromServices] GetOpenAIQuery handler) =>
+app.MapPost("/ask", async ([FromBody] QuestionDto question, [FromServices] GetOpenAIQuery handler) =>
 {
-    return Results.Ok(handler.Execute(question.Query));
+    Result<string> response = await handler.Execute(question.Query);
+    if (response.IsFailure)
+        return Results.Problem(response.Error);
+    
+    return Results.Ok(response.Value);
 });
 
 app.Run();
