@@ -1,0 +1,11 @@
+@AzElevator.AzureAIHandsOn_HostAddress = http://localhost:5236
+
+POST {{AzElevator.AzureAIHandsOn_HostAddress}}/ask/
+Accept: application/json
+Content-Type: application/json 
+
+{
+"query" : "Hello"
+}
+
+###
