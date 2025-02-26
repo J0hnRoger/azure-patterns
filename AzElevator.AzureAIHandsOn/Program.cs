@@ -1,4 +1,5 @@
 using AzElevator.AzureAIHandsOn.Services;
+using AzElevator.AzureAIHandsOn.Services.LLM;
 using CSharpFunctionalExtensions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,6 +10,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 
 builder.Services.AddScoped<GetOpenAIQuery>();
+builder.Services.AddScoped<GetLinkedinInboundMarketingPostQuery>();
+
+// Enregistrement des deux services avec leurs clés
+builder.Services.AddSingleton<ILLMService, AzureOpenAIService>();
+builder.Services.AddSingleton<ILLMService, LocalLLMService>();
 
 var app = builder.Build();
 
@@ -29,6 +35,30 @@ app.MapPost("/ask", async ([FromBody] QuestionDto question, [FromServices] GetOp
     return Results.Ok(response.Value);
 });
 
+app.MapPost("/marketer", async ([FromBody] QuestionDto question,
+    [FromQuery] string llm,
+    [FromServices] IEnumerable<ILLMService> llmProvider 
+) =>
+{
+    
+    // Sélection du service en fonction du paramètre
+    var selectedService = llm switch
+    {
+        LLMServiceKeys.Local => llmProvider.First(model => model.Name == llm),
+        _ => llmProvider.First(model => model.Name == LLMServiceKeys.Azure)
+    };
+
+    var handler = new GetLinkedinInboundMarketingPostQuery(
+        app.Configuration,
+        app.Services.GetRequiredService<ILogger<GetLinkedinInboundMarketingPostQuery>>(),
+        selectedService);
+
+    Result<GetOpenAIQueryResponse> response = await handler.Execute(question.Query);
+    if (response.IsFailure)
+        return Results.Problem(response.Error);
+    
+    return Results.Ok(response.Value);
+});
 app.Run();
 
 public class QuestionDto

@@ -2,7 +2,6 @@
 using Azure.Search.Documents;
 using Azure.Search.Documents.Models;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using CSharpFunctionalExtensions;
 using TiktokenSharp;
 
@@ -44,12 +43,7 @@ public class GetOpenAIQuery
         // Étape 1 : Recherche dans Azure AI Search
         var searchResults = await _searchClient.SearchAsync<SearchDocument>(
             query,
-            new SearchOptions
-            {
-                Size = 3,
-                QueryType = SearchQueryType.Simple,
-                Select = { "content" }
-            } 
+            new SearchOptions {Size = 3, QueryType = SearchQueryType.Simple, Select = {"content"}}
         );
 
         List<string> contexts = new();
@@ -85,12 +79,20 @@ public class GetOpenAIQuery
                 {
                     role = "system",
                     content =
-                        "Tu es un software architect / lead developer aidant les développeurs seniors à trouver des solutions logicielles dans l'état de l'art."
+                        "Tu es un expert Marketing qui m'aide à transformer ma base de connaissances en post virales pour 'hook' mes clients et leur vendre mes services de développement d'un MVP sur Azure" +
+                    "- **Accroche percutante** : Une phrase choc qui capte l'attention dès le début.\n" +
+                    "- **Problème clé** : Un problème spécifique auquel fait face le persona ciblé (exemple : 'scalabilité imprévisible' pour les CTO).\n"
+                    +
+                    "- **Solution innovante** : Mettre en avant une solution basée sur le Cloud Azure en expliquant ses avantages concrets.\n"
+                    +
+                    "- **Preuve sociale** : Inclure une statistique percutante ou un témoignage.\n" +
+                    "- **Appel à l'action (CTA)** : Inviter à commenter, partager ou se connecter avec moi.\n" +
+                    "Le post ne doit pas dépasser 2200 caractères."
                 },
+                
                 new {role = "user", content = prompt}
             },
-            temperature = 0.7,
-            max_token = 1000
+            temperature = 0.7
         };
 
         var response = await _httpClient.PostAsync(
@@ -125,31 +127,4 @@ public class GetOpenAIQuery
         text = text.Trim();
         return text;
     }
-}
-
-// Modèle pour parser la réponse
-public class TokenUsageResponse
-{
-    [JsonPropertyName("usage")] public TokenUsage Usage { get; set; }
-}
-
-public class TokenUsage
-{
-    [JsonPropertyName("total_tokens")] public int TotalTokens { get; set; }
-}
-
-// 🔄 Modèle pour parser la réponse OpenAI
-public class OpenAIResponse
-{
-    [JsonPropertyName("choices")] public Choice[] Choices { get; set; }
-}
-
-public class Choice
-{
-    [JsonPropertyName("message")] public Message Message { get; set; }
-}
-
-public class Message
-{
-    [JsonPropertyName("content")] public string Content { get; set; }
 }

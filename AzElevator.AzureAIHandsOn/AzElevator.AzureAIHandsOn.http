@@ -5,7 +5,17 @@ Accept: application/json
 Content-Type: application/json 
 
 {
-"query" : "Tu connais des design patterns ?"
+"query" : "Quelles sont les phases du cycle de vie d'une entreprise?"
+}
+
+###
+
+POST {{AzElevator.AzureAIHandsOn_HostAddress}}/marketer?llm=local
+Accept: application/json
+Content-Type: application/json
+
+{
+  "query" : "Tu peux me rédiger un article sur la relation entre TDD et l'utilisation de l'IA ?"
 }
 
 ###
