@@ -90,9 +90,19 @@ public class GetLinkedinInboundMarketingPostQuery
 
         try
         {
-            string systemPrompt = "Tu es un expert Marketing qui m'aide à transformer ma base de connaissances en post virales pour 'hook' mes clients et leur vendre mes services de développement d'un MVP sur Azure";
+            string systemPrompt = 
+                        "Tu es un expert Marketing qui m'aide à transformer ma base de connaissances de CTO/Lead Tech .Net Azure en post virales pour 'hook' mes clients et leur vendre mes services de développement d'un MVP sur Azure" +
+                    "- **Accroche percutante** : Une phrase choc qui capte l'attention dès le début.\n" +
+                    "- **Problème clé** : Un problème spécifique auquel fait face le persona ciblé (exemple : 'scalabilité imprévisible' pour les CTO).\n"
+                    +
+                    "- **Solution innovante** : Mettre en avant une solution basée sur le Cloud Azure en expliquant ses avantages concrets.\n"
+                    +
+                    "- **Preuve sociale** : Inclure une statistique percutante ou un témoignage.\n" +
+                    "- **Appel à l'action (CTA)** : Inviter à commenter, partager ou se connecter avec moi.\n" +
+                    "Le post ne doit pas dépasser 2200 caractères."
+;
             string answer = await _llmService.GetCompletion(systemPrompt, prompt);
-            return new GetOpenAIQueryResponse(answer, tokenCount);
+            return new GetOpenAIQueryResponse(answer, tokenCount, []);
         }
         catch (Exception ex)
         {
@@ -119,5 +129,3 @@ public class GetLinkedinInboundMarketingPostQuery
         return text;
     }
 }
-
-public record GetOpenAIQueryResponse(string Answer, int TokenCount);

@@ -38,12 +38,14 @@ public class GetOpenAIQuery
         _httpClient.DefaultRequestHeaders.Add("api-key", openAiKey);
     }
 
-    public async Task<Result<string>> Execute(string query)
+    public async Task<Result<GetOpenAIQueryResponse>> Execute(string query)
     {
         // Étape 1 : Recherche dans Azure AI Search
         var searchResults = await _searchClient.SearchAsync<SearchDocument>(
             query,
-            new SearchOptions {Size = 3, QueryType = SearchQueryType.Simple, Select = {"content"}}
+            new SearchOptions {Size = 3, QueryType = SearchQueryType.Simple,
+                Select = { "content" }
+            }
         );
 
         List<string> contexts = new();
@@ -79,15 +81,8 @@ public class GetOpenAIQuery
                 {
                     role = "system",
                     content =
-                        "Tu es un expert Marketing qui m'aide à transformer ma base de connaissances en post virales pour 'hook' mes clients et leur vendre mes services de développement d'un MVP sur Azure" +
-                    "- **Accroche percutante** : Une phrase choc qui capte l'attention dès le début.\n" +
-                    "- **Problème clé** : Un problème spécifique auquel fait face le persona ciblé (exemple : 'scalabilité imprévisible' pour les CTO).\n"
-                    +
-                    "- **Solution innovante** : Mettre en avant une solution basée sur le Cloud Azure en expliquant ses avantages concrets.\n"
-                    +
-                    "- **Preuve sociale** : Inclure une statistique percutante ou un témoignage.\n" +
-                    "- **Appel à l'action (CTA)** : Inviter à commenter, partager ou se connecter avec moi.\n" +
-                    "Le post ne doit pas dépasser 2200 caractères."
+                        "Tu es un lead tech' senior qui m'aide à formuler mes idées en trouvant des liens dans ma base de connaissances pour créer du contenu innovant" +
+                    "Tu me donnes des réponses concises et qui vont droit au but, en respectant les principes de Smart Brevity"
                 },
                 
                 new {role = "user", content = prompt}
@@ -102,11 +97,12 @@ public class GetOpenAIQuery
 
         var responseContent = await response.Content.ReadAsStringAsync();
         if (!response.IsSuccessStatusCode)
-            return Result.Failure<string>(responseContent);
+            return Result.Failure<GetOpenAIQueryResponse>(responseContent);
 
         var jsonResponse = JsonSerializer.Deserialize<OpenAIResponse>(responseContent);
-
-        return jsonResponse?.Choices?[0]?.Message?.Content ?? "Je n'ai pas trouvé de réponse pertinente.";
+        string answer= jsonResponse?.Choices?[0]?.Message?.Content ?? "Je n'ai pas trouvé de réponse pertinente.";
+        
+        return new GetOpenAIQueryResponse(answer, tokenCount, []);
     }
 
     private async Task<int> GetTokenCount(string text)

@@ -15,6 +15,16 @@ builder.Services.AddScoped<GetLinkedinInboundMarketingPostQuery>();
 // Enregistrement des deux services avec leurs clés
 builder.Services.AddSingleton<ILLMService, AzureOpenAIService>();
 builder.Services.AddSingleton<ILLMService, LocalLLMService>();
+builder.Services.AddCors(c =>
+{
+    c.AddDefaultPolicy(p =>
+    {
+        p.WithOrigins("http://localhost:5173")
+            .AllowCredentials()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
 
 var app = builder.Build();
 
@@ -28,19 +38,18 @@ app.UseHttpsRedirection();
 
 app.MapPost("/ask", async ([FromBody] QuestionDto question, [FromServices] GetOpenAIQuery handler) =>
 {
-    Result<string> response = await handler.Execute(question.Query);
+    Result<GetOpenAIQueryResponse> response = await handler.Execute(question.Query);
     if (response.IsFailure)
         return Results.Problem(response.Error);
-    
+
     return Results.Ok(response.Value);
 });
 
 app.MapPost("/marketer", async ([FromBody] QuestionDto question,
     [FromQuery] string llm,
-    [FromServices] IEnumerable<ILLMService> llmProvider 
+    [FromServices] IEnumerable<ILLMService> llmProvider
 ) =>
 {
-    
     // Sélection du service en fonction du paramètre
     var selectedService = llm switch
     {
@@ -56,9 +65,12 @@ app.MapPost("/marketer", async ([FromBody] QuestionDto question,
     Result<GetOpenAIQueryResponse> response = await handler.Execute(question.Query);
     if (response.IsFailure)
         return Results.Problem(response.Error);
-    
+
     return Results.Ok(response.Value);
 });
+
+app.UseCors();
+
 app.Run();
 
 public class QuestionDto
